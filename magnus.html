@@ -111,17 +111,21 @@
 	// console.log("%%%%%%%%%%%%%%% cl1 %%%%%%%%%%%%%%%:" + cl1);
 
 	var argArr = new Array();
+	var display = {};
 	for (i = 0; i < x1.length; i++) { 
-    	var jsonArg = new Object();
+		var jsonArg = new Object();
     	jsonArg.xPosition = x1[i];
     	jsonArg.zPosition = z1[i];
     	jsonArg.timeStamp = i * h;
     	jsonArg.cd = cd1[i];
     	jsonArg.cl = cl1[i];
     	jsonArg.vel = vel1[i];
-    	argArr.push(jsonArg);
+
+		display["" + i] = jsonArg;
+
+    	//argArr.push(jsonArg);
 	}
-	var jsonArray = JSON.stringify(argArr);
+	var jsonArray = JSON.stringify(display);
 	console.log(jsonArray);
 
 	// TOTAL TIME
