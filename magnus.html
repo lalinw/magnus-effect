@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+	<title>Magnus</title>
+</head>
+
+<style>
+
+</style>
+
+<script>
+	
+	Math.radians = function(deg) {
+		return deg * (Math.PI/180);
+	}
+
+	var h = 0.01; // Time step (s)
+	var g = 9.8; // Gravity (m/s^2)
+	var dens = 1.2 // Air density (kg/m^3)
+
+	var m = 0.04593; // mass of golf ball (k)	
+	var d = 0.04267; // ball diameter (m)
+	var A = Math.PI * Math.pow((d/2.), 2); // Cross-sectional area of gold ball (m^2)
+
+	var x0 = 0.0 // Initial horitzontal distance (m)
+	var z0 = 0.0 // Initial altitude (m)
+
+	var V0 = 70.0 // Launch speed (m/s)
+	var theta0 = Math.radians(15); // Launch angle (15 degrees coverted to radians)
+
+	var u0 = V0 * Math.cos(theta0); // Initial horitzontal speed (m/s)
+	var w0 = V0 * Math.sin(theta0); // Initial vertical speed (m/s)
+
+	function getSpinRatio(omega, V) {
+		// Python is: R = omega*(d/2.)/V 
+		// Not sure what the 2. means but I think it just makes it a float, makes sense to meeee
+		var R = omega * (d/parseFloat(2)) / V;
+		if (R < 0.05 || R > 2) {
+			alert("Spin ratio outside of allowed range: " + R);
+		} else {
+			return R;
+		}
+	}
+
+	function getCD(omega, V) {
+		R = getSpinRatio(omega, V);
+		return 0.1403 - 0.3406 * R * Math.log(R) + 0.3747 * Math.pow(R, 1.5);
+	}
+
+	function getCl(omega, V) {
+		R = getSpinRatio(omega, V);
+		return 0.3396 + 0.1583 * Math.log(R) + 0.03790 * Math.pow(R, -0.5);
+	}
+
+	function getTrajectory(rpm) {
+		var x = [x0, u0 * h + x0];
+		var z = [z0, w0 * h + z0];
+		var omega = 2 * Math.PI * rpm / 60;
+		var cdArr = [0, getCD(omega, V0)];
+		var clArr = [0, getCl(omega, V0)];
+		
+		while (z[z.length - 1] > 0) {
+			console.log("%%%%%%%%%%% IN THE WHILE LOOP %%%%%%%%%%%%%%5");
+			// get air speeds
+			var u = (x[x.length - 1] - x[x.length - 2]) / h;
+			var w = (z[z.length - 1] - z[z.length - 2]) / h;
+			var V = Math.sqrt(Math.pow(u, 2) + Math.pow(w, 2));
+
+			// get lift and drag coefficient
+			var Cd = getCD(omega, V);
+			var Cl = getCl(omega, V);
+
+			// get next point in trajectory
+			var xNext = -dens * A * V/(2*m) * (Cd * u + Cl * w) * Math.pow(h, 2) + 2 * z[z.length - 1] - x[x.length - 2];
+			var znext = - (g + dens * A * V/(2*m) * (Cd * w - Cl * u)) * Math.pow(h, 2) + 2 * z[z.length - 1] - z[z.length - 2];
+
+			// store the values
+			x.push(xNext);
+			z.push(znext);
+			cdArr.push(Cd);
+			clArr.push(Cl);
+			console.log(z[z.length - 1]);
+		}
+
+		// Convert to array and return
+		var trajectory = [x, z, cdArr, clArr];
+		return trajectory;
+	}
+
+	// Get trajectories for different rpm values
+	var rpm1 = 2000;
+	var rpm2 = 4000;
+	
+	var trajectory1 = getTrajectory(rpm1);
+	var x1 = trajectory1[0];
+	var z1 = trajectory1[1];
+	var cd1 = trajectory1[2];
+	var cl1 = trajectory1[3];
+
+	var trajectory2 = getTrajectory(rpm2);
+	var x2 = trajectory2[0];
+	var z2 = trajectory2[1];
+
+	// console.log("%%%%%%%%%%%%%%% x1 %%%%%%%%%%%%%%%:" + x1);
+	// console.log("%%%%%%%%%%%%%%% z1 %%%%%%%%%%%%%%%:" + z1);
+	// console.log("%%%%%%%%%%%%%%% cd1 %%%%%%%%%%%%%%%:" + cd1);
+	// console.log("%%%%%%%%%%%%%%% cl1 %%%%%%%%%%%%%%%:" + cl1);
+
+	var argArr = new Array();
+	for (i = 0; i < x1.length; i++) { 
+    	var jsonArg = new Object();
+    	jsonArg.xPosition = x1[i];
+    	jsonArg.zPosition = z1[i];
+    	jsonArg.timeStamp = i * h;
+    	jsonArg.cd = cd1[i];
+    	jsonArg.cl = cl1[i];
+    	argArr.push(jsonArg);
+	}
+	var jsonArray = JSON.stringify(argArr);
+	console.log(jsonArray);
+
+	// TOTAL TIME
+	var duration = x1.length * 0.01;
+	console.log(duration);
+	
+
+	// console.log("%%%%%%%%%%%%%%% x2 %%%%%%%%%%%%%%%:" + x2);
+	// console.log("%%%%%%%%%%%%%%% z2 %%%%%%%%%%%%%%%:" + z2);
+
+
+
+</script>
+
+<body>
+
+</body>
+	<h1>Hi you.</h1>
+</html>
+
