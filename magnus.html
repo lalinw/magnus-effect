@@ -2,11 +2,30 @@
 <meta charset="utf-8">
 
 <head>
-	<title>Magnus</title>
+	<title>Magnus Effect</title>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 </head>
 
 <style>
+    .axis {
+	  font: 10px sans-serif;
+	}
 
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+    body {
+        font-family: Cambria, Cochin, Georgia, Times, Times New Roman, serif
+    }
+    
+    .title {
+        text-align: center;
+    }
 </style>
 
 <script>
@@ -132,13 +151,104 @@
 	// console.log("%%%%%%%%%%%%%%% x2 %%%%%%%%%%%%%%%:" + x2);
 	// console.log("%%%%%%%%%%%%%%% z2 %%%%%%%%%%%%%%%:" + z2);
 
+    //D3////////////////////////////
+    var margin = {top: 20, right: 20, bottom: 70, left: 40},
+        width = 600 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
 
+    
+    var svg = d3.select("#graph").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", 
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    var cases = [];    
+    
+    var xDomain = d3.max(jsonArray.xPosition);
+    console.log(jsonArray.xPosition);
+    
+    var x = d3.scale.linear().domain([0,xDomain]).range([0, width]);
+    var y = d3.scale.linear().domain([0,yDomain]).range([height, 0]);
+            
+    function draw() {
+        
+        var data = jsonArray;                
+
+                 
+        
+        
+        svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .style("fill", "steelblue")
+            .attr("cx", function(d, i) { 
+                console.log(d);
+                return d.xPosition; })
+            .attr("r", "3px")
+            .attr("cy", function(d, i) { return d.zPosition; })
+            .attr("opacity", '0')
+            .transition()
+            .duration(200)
+            .attr("opacity", '1')
+            .delay(function(d,i) { return i*20;});
+            
+
+    }
+    
 
 </script>
 
 <body>
+    <div class="title">
+        <h2>Magnus Effect</h2>
+        <br> 
+        <br>
+    </div>
+    
+    <div class="row" id="magnusform">
+        <div class="col-xs-6" id="graph">
+        </div>
+        <div class="col-xs-2">
+            <form action="">
+                <fieldset>
+                    <legend>Independent Variables:</legend>
+                    Initial Velocity:<br>
+                    <input type="text" name="firstname" value=""><br>
+                    Mass of Object:<br>
+                    <input type="text" name="lastname" value=""><br>
+                    Spin Axis (in Radians):<br>
+                    <input type="text" name="lastname" value=""><br>
+                    Initial Height (y-position):<br>
+                    <input type="text" name="lastname" value=""><br>
+                </fieldset>
+            </form>
+            <br>
+         </div>
+         
+         <div class="col-xs-2">
+            <legend>Output:</legend>
+            Final Velocity:
+            <input type="text" name="firstname" value=""><br>
+            Displacement:
+            <input type="text" name="lastname" value=""><br>
+            Time Elapsed:
+            <input type="text" name="lastname" value=""><br>
+            Magnus Coefficient:
+            <input type="text" name="lastname" value=""><br>
+         </div>
+    </div>
+    <br>
+    <div>
+        <div class="col-xs-6"></div>
+        <div class="col-xs-2">
+            <button type="button" class="btn btn-primary btn-lg" onclick="draw();">Generate</button>
+        </div>
+        
+    </div>
 
 </body>
-	<h1>Hi you.</h1>
+	
 </html>
 
