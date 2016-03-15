@@ -59,6 +59,7 @@
 		var omega = 2 * Math.PI * rpm / 60;
 		var cdArr = [0, getCD(omega, V0)];
 		var clArr = [0, getCl(omega, V0)];
+		var vArr = [0, V0];
 		
 		while (z[z.length - 1] > 0) {
 			console.log("%%%%%%%%%%% IN THE WHILE LOOP %%%%%%%%%%%%%%5");
@@ -80,11 +81,12 @@
 			z.push(znext);
 			cdArr.push(Cd);
 			clArr.push(Cl);
+			vArr.push(V);
 			console.log(z[z.length - 1]);
 		}
 
 		// Convert to array and return
-		var trajectory = [x, z, cdArr, clArr];
+		var trajectory = [x, z, cdArr, clArr, vArr];
 		return trajectory;
 	}
 
@@ -97,6 +99,7 @@
 	var z1 = trajectory1[1];
 	var cd1 = trajectory1[2];
 	var cl1 = trajectory1[3];
+	var vel1 = trajectory1[4];
 
 	var trajectory2 = getTrajectory(rpm2);
 	var x2 = trajectory2[0];
@@ -115,6 +118,7 @@
     	jsonArg.timeStamp = i * h;
     	jsonArg.cd = cd1[i];
     	jsonArg.cl = cl1[i];
+    	jsonArg.vel = vel1[i];
     	argArr.push(jsonArg);
 	}
 	var jsonArray = JSON.stringify(argArr);
