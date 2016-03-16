@@ -92,7 +92,7 @@
 			var Cl = getCl(omega, V);
 
 			// get next point in trajectory
-			var xNext = -dens * A * V/(2*m) * (Cd * u + Cl * w) * Math.pow(h, 2) + 2 * z[z.length - 1] - x[x.length - 2];
+			var xNext = -dens * A * V/(2*m) * (Cd * u + Cl * w) * Math.pow(h, 2) + 2 * x[x.length - 1] - x[x.length - 2];
 			var znext = - (g + dens * A * V/(2*m) * (Cd * w - Cl * u)) * Math.pow(h, 2) + 2 * z[z.length - 1] - z[z.length - 2];
 
 			// store the values
