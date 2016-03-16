@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+	<title>Magnus Effect</title>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    
+</head>
+
+<body>
+    <div class="title">
+        <h2>Magnus Effect</h2>
+        <br> 
+    </div>
+    
+    <div class="row" id="magnusform">
+        <div class="col-xs-6" id="graph">
+        </div>
+        <div class="col-xs-2">
+            <form action="">
+                <fieldset>
+                    <legend>Independent Variables:</legend>
+                    Initial Speed (m/s):<br>
+                    <input type="text" name="firstname" value=""><br>
+                    Mass of Object (kg):<br>
+                    <input type="text" name="lastname" value=""><br>
+                    Diameter of Object (m):<br>
+                    <input type="text" name="lastname" value=""><br>
+                    Launch Angle (Radians):<br>
+                    <input type="text" name="lastname" value=""><br>
+                    Initial Altitude (m):<br>
+                    <input type="text" name="lastname" value=""><br>
+                    
+                </fieldset>
+            </form>
+            <br>
+         </div>
+         
+         <div class="col-xs-3">
+            <legend>Output:</legend>
+            Final Velocity:
+            <input type="text" name="firstname" value=""><br>
+            Displacement:
+            <input type="text" name="lastname" value=""><br>
+            Time Elapsed:
+            <input type="text" name="lastname" value=""><br>
+            Magnus Coefficient:
+            <input type="text" name="lastname" value=""><br>
+         </div>
+    </div>
+    <br>
+    <div>
+        <div class="col-xs-6"></div>
+        <div class="col-xs-2">
+            <button type="button" class="btn btn-primary btn-lg" onclick="simulate(0.04593, 0.04267, 0.0, 70.0, 15);">Generate</button>
+        </div>
+        
+    </div>
+
+</body>
+
+<script>
+    
+    Math.radians = function(deg) {
+        return deg * (Math.PI/180);
+    }
+    
+    function simulate(m, d, z0, V0, theta0) {
+        // var m = 0.04593; // mass of golf ball (k)	
+        // var d = 0.04267; // ball diameter (m)
+        // var z0 = 0.0 // Initial altitude (m)
+        // var V0 = 70.0 // Launch speed (m/s)
+        // var theta0 = Math.radians(15); // Launch angle (15 degrees coverted to radians)
+
+        theta0 = Math.radians(theta0);
+        
+        var h = 0.01; // Time step (s)
+        var g = 9.8; // Gravity (m/s^2)
+        var dens = 1.2 // Air density (kg/m^3)
+
+        var A = Math.PI * Math.pow((d/2.), 2); // Cross-sectional area of gold ball (m^2)
+
+        var x0 = 0.0 // Initial horitzontal distance (m)
+        
+        var u0 = V0 * Math.cos(theta0); // Initial horitzontal speed (m/s)
+        var w0 = V0 * Math.sin(theta0); // Initial vertical speed (m/s)
+
+        function getSpinRatio(omega, V) {
+            // Python is: R = omega*(d/2.)/V 
+            // Not sure what the 2. means but I think it just makes it a float, makes sense to meeee
+            var R = omega * (d/parseFloat(2)) / V;
+            if (R < 0.05 || R > 2) {
+                alert("Spin ratio outside of allowed range: " + R);
+            } else {
+                return R;
+            }
+        }
+
+        function getCD(omega, V) {
+            R = getSpinRatio(omega, V);
+            return 0.1403 - 0.3406 * R * Math.log(R) + 0.3747 * Math.pow(R, 1.5);
+        }
+
+        function getCl(omega, V) {
+            R = getSpinRatio(omega, V);
+            return 0.3396 + 0.1583 * Math.log(R) + 0.03790 * Math.pow(R, -0.5);
+        }
+
+        function getTrajectory(rpm) {
+            var x = [x0, u0 * h + x0];
+            var z = [z0, w0 * h + z0];
+            var omega = 2 * Math.PI * rpm / 60;
+            var cdArr = [0, getCD(omega, V0)];
+            var clArr = [0, getCl(omega, V0)];
+            var vArr = [0, V0];
+            
+            while (z[z.length - 1] > 0) {
+                console.log("%%%%%%%%%%% IN THE WHILE LOOP %%%%%%%%%%%%%%5");
+                // get air speeds
+                var u = (x[x.length - 1] - x[x.length - 2]) / h;
+                var w = (z[z.length - 1] - z[z.length - 2]) / h;
+                var V = Math.sqrt(Math.pow(u, 2) + Math.pow(w, 2));
+
+                // get lift and drag coefficient
+                var Cd = getCD(omega, V);
+                var Cl = getCl(omega, V);
+
+                // get next point in trajectory
+                var xNext = -dens * A * V/(2*m) * (Cd * u + Cl * w) * Math.pow(h, 2) + 2 * z[z.length - 1] - x[x.length - 2];
+                var znext = - (g + dens * A * V/(2*m) * (Cd * w - Cl * u)) * Math.pow(h, 2) + 2 * z[z.length - 1] - z[z.length - 2];
+
+                // store the values
+                x.push(xNext);
+                z.push(znext);
+                cdArr.push(Cd);
+                clArr.push(Cl);
+                vArr.push(V);
+                console.log(z[z.length - 1]);
+            }
+
+            // Convert to array and return
+            var trajectory = [x, z, cdArr, clArr, vArr];
+            return trajectory;
+        }
+
+        // Get trajectories for different rpm values
+        var rpm1 = 2000;
+        var rpm2 = 4000;
+
+        var trajectory1 = getTrajectory(rpm1);
+        var x1 = trajectory1[0];
+        var z1 = trajectory1[1];
+        var cd1 = trajectory1[2];
+        var cl1 = trajectory1[3];
+        var vel1 = trajectory1[4];
+
+        var trajectory2 = getTrajectory(rpm2);
+        var x2 = trajectory2[0];
+        var z2 = trajectory2[1];
+        
+        var argArr = new Array();
+        for (i = 0; i < x1.length; i++) { 
+            var jsonArg = new Object();
+            jsonArg.xPosition = x1[i];
+            jsonArg.zPosition = z1[i];
+            jsonArg.timeStamp = i * h;
+            jsonArg.cd = cd1[i];
+            jsonArg.cl = cl1[i];
+            jsonArg.vel = vel1[i];
+            argArr.push(jsonArg);
+        }
+        
+        console.log(argArr);
+        // TOTAL TIME
+        var duration = x1.length * 0.01;
+        console.log(duration);
+        
+        draw(argArr);
+    }
+
+    //D3////////////////////////////
+    var color10 = ['#1f77b4','#ff7f0e','#2ca02c', '#d62728', '#9467bd',
+    '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
+
+    var margin = {top: 20, right: 20, bottom: 40, left: 40},
+        width = 600 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+        
+    var svg = d3.select("#graph").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("fill", "grey")
+        .append("g")
+        .attr("transform", 
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    //accessing the variable
+    var xAccess = function(d) { return d.xPosition; }
+    var yAccess = function(d) { return d.zPosition; }
+
+    //initialize scale
+    var x = d3.scale.linear().domain([0,10]).range([0, width]);
+    var y = d3.scale.linear().domain([0,10]).range([0, height]);
+            
+    function draw(data) {
+        //rescale
+        x.domain(d3.extent(data, xAccess));
+        y.domain(d3.extent(data, yAccess));
+        console.log(data[2]);
+        console.log('inside draw');
+
+        // var circles = svg.selectAll("circle").data(data, dateFn)
+
+        // circles.transition()
+        //     .attr("cx", function(d) { return x(d.xPosition); })
+        //     .attr("cy", function(d) { return y(d.zPosition); });
+        
+        // circles.enter()
+        //     .append("svg:circle")
+        //     .attr("r", 4)
+        //     .attr("cx", function(d) { return x(dateFn(d)) })
+        //     .attr("cy", function(d) { return y(amountFn(d)) })
+
+            
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .style("fill", "steelblue")
+            .attr("cx", function(d) {    
+                return x(d.xPosition); })
+            .attr("r", "3px")
+            .attr("cy", function(d) { 
+                return y(d.zPosition); })
+            .attr('opacity', '0')
+            .transition()
+            .duration(1)
+            .delay(function(d, i) { return i*10; })
+            .attr('opacity', '0.4');
+            
+    }
+    
+    d3.selectAll(".add-data")
+        .on("click", function() {
+            var start = d3.min(data, dateFn)
+            var end = d3.max(data, dateFn)
+            var time = start.getTime() + Math.random() * (end.getTime() - start.getTime())
+            var date = new Date(time)
+
+            obj = {
+            'id': Math.floor(Math.random() * 70),
+            'amount': Math.floor(1000 + Math.random() * 20001),
+            'created_at': date.toDateString()
+            }
+            data.push(obj);
+            draw();
+        
+    });
+   
+</script>
+	
+</html>
+
