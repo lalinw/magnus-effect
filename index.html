@@ -165,7 +165,7 @@
         for (i = 0; i < x1.length; i++) { 
             var jsonArg = new Object();
             jsonArg.xPosition = x1[i];
-            jsonArg.zPosition = z1[i];
+            jsonArg.zPosition = height - z1[i];
             jsonArg.timeStamp = i * h;
             jsonArg.cd = cd1[i];
             jsonArg.cl = cl1[i];
