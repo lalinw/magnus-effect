@@ -4,7 +4,7 @@
 <head>
 	<title>Magnus Effect</title>
     <script src="http://d3js.org/d3.v3.min.js"></script>
-    
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
     
@@ -12,37 +12,62 @@
 
 <body>
     <div class="title">
-        <h2>Magnus Effect</h2>
-        <br> 
+        <h1><b>Magnus Effect</b></h1>
     </div>
     
     <div class="row" id="magnusform">
-        <div class="col-xs-6" id="graph">
+        <div class="col-xs-8" id="graph">
         </div>
-        <div class="col-xs-2">
-            <form action="">
-                <fieldset>
-                    <legend>Independent Variables:</legend>
-                    Launch Speed (m/s):<br>
-                    <input type="number" name="launchspeed" value="70.0"><br>
-                    Mass of Object (kg):<br>
-                    <input type="number" name="mass" value="0.04593"><br>
-                    Diameter of Object (m):<br>
-                    <input type="number" name="diameter" value="0.04267"><br>
-                    Launch Angle (Radians):<br>
-                    <input type="number" name="angle" value="15"><br>
-                    Rotations per Minute:<br>
-                    <input type="number" name="rpm" value="2000"><br>
-                    Initial Altitude (m):<br>
-                    <input type="number" name="altitude" value="0.0"><br>
-                    Air Density (kg/m^3):<br>
-                    <input type="number" name="airdensity" value="1.2"><br>
-                    Gravity (m/s^2):<br>
-                    <input type="number" name="gravity" value="9.8"><br>
+        <div class="col-xs-4">
+            <legend>Independent Variables:</legend>
+            <table width="90%">
+                <tr>
+                    <td style="text-align:right;">Launch Speed (m/s):</td>
+                    <td><input type="number" name="launchspeed" value="70.0"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Mass of Object (kg):</td>
+                    <td><input type="number" name="mass" value="0.04593" min="0.01"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Diameter of Object (m):</td>
+                    <td><input type="number" name="diameter" value="0.04267" min="0.01"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Launch Angle (Radians):</td>
+                    <td><input type="number" name="angle" value="15" min="0"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Rotations per Minute:</td>
+                    <td><input type="number" name="rpm" value="2000" min="1"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Initial Altitude (m):</td>
+                    <td><input type="number" name="altitude" value="0.0" min="0"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Air Density (kg/m^3):</td>
+                    <td><input type="number" name="airdensity" value="1.2"></td>
+                </tr>
+                <tr>
+                    <td style="text-align:right;">Gravity (m/s^2):</td>
+                    <td><input type="number" name="gravity" value="9.8"></td>
+                </tr>
 
-                </fieldset>
-            </form>
-            <br>
+            </table>
+            
+            <div style="margin-top: 20px;">
+                <table width="90%">
+                    <tr>
+                        <td style="text-align:center;">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="submit();">Generate</button>
+                        </td>
+                        <td style="text-align:center;">
+                            <button type="button" class="btn btn-danger btn-lg" onclick="reset();">Clear All</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
          </div>
          
          <div class="col-xs-3">
@@ -56,14 +81,7 @@
          </div>
     </div>
     <br>
-    <div>
-        <div class="col-xs-6"></div>
-        <div class="col-xs-2">
-            <button type="button" class="btn btn-primary btn-lg" onclick="submit();">Generate</button>
-        </div>
-        
-    </div>
-
+    
 </body>
 
 <script>
@@ -89,12 +107,6 @@
     
     var argArr = new Array();
     function simulate(m, d, z0, V0, theta0, airdensity, gravity, rpm) {
-        console.log(colorUsed);
-        // var m = 0.04593; // mass of golf ball (k)	
-        // var d = 0.04267; // ball diameter (m)
-        // var z0 = 0.0 // Initial altitude (m)
-        // var V0 = 70.0 // Launch speed (m/s)
-        // var theta0 = Math.radians(15); // Launch angle (15 degrees coverted to radians)
         if (colorUsed.indexOf(false) == -1) {
             alert("You have exceeded the maximum number of concurrent simulations. Please remove an existing simulation before adding another.");
             console.log("alerrrt");
@@ -151,7 +163,6 @@
             var vArr = [0, V0];
             
             while (z[z.length - 1] > 0) {
-                // console.log("%%%%%%%%%%% IN THE WHILE LOOP %%%%%%%%%%%%%%5");
                 // get air speeds
                 var u = (x[x.length - 1] - x[x.length - 2]) / h;
                 var w = (z[z.length - 1] - z[z.length - 2]) / h;
@@ -171,15 +182,12 @@
                 cdArr.push(Cd);
                 clArr.push(Cl);
                 vArr.push(V);
-                // console.log(z[z.length - 1]);
             }
             
             // Convert to array and return
             var trajectory = [x, z, cdArr, clArr, vArr];
             return trajectory;
         }
-
-
 
         // Get trajectories for different rpm values
         var trajectory1 = getTrajectory(rpm);
@@ -189,10 +197,7 @@
         var cl1 = trajectory1[3];
         var vel1 = trajectory1[4];
 
-        console.log(cd1);
-        console.log(cl1);
         if (cd1.indexOf(null) != -1 || cl1.indexOf(null) != -1) {
-            console.log("BOSBAOFHOAHFOS");
             alert("Spin ratio outside of allowed range");
             return null;
         } 
@@ -212,21 +217,16 @@
         }
         colorUsed[colorInt] = true;
             
-        // console.log(argArr);
         // TOTAL TIME
         var duration = x1.length * 0.01;
-        // console.log(duration);
         
         draw(argArr);
     }
 
-    //D3////////////////////////////
-    
-    //var colorUsed = [true, true, true, true, false];
-    var margin = {top: 20, right: 20, bottom: 40, left: 40},
-        width = 600 - margin.left - margin.right,
+    //D3//////////////////////////////////////////////////////////////////////////
+    var margin = {top: 20, right: 20, bottom: 40, left: 50},
+        width = 800 - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
-
         
     var svg = d3.select("#graph").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -243,7 +243,20 @@
     //initialize scale
     var x = d3.scale.linear().domain([0,10]).range([0, width]);
     var y = d3.scale.linear().domain([0,10]).range([0, height]);
-            
+    
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+    //tooltip as div
+    var div = d3.select("body").append("div")	
+        .attr("class", "tooltip")				
+        .style("opacity", 0);
+       
     function draw() {
         //rescale
         x.domain(d3.extent(argArr, xAccess));
@@ -256,20 +269,42 @@
             .duration(500)
             .style("fill", function(d) { return d.dotColor; })
             .attr("cx", function(d) { return x(d.xPosition); })
-            .attr("cy", function(d) { return y(d.zPosition); })
-            ;
+            .attr("cy", function(d) { return y(d.zPosition); });
 
         circles.enter()
             .append("circle")
             .style("fill", function(d) { return d.dotColor; })
             .attr("cx", function(d) { return x(d.xPosition); })
             .attr("cy", function(d) { return y(d.zPosition); })
-            .attr("r", "3px")
+            .attr("r", 4)
             .attr('opacity', '0')
+            .on("mouseover", function(d) {	
+                d3.select(this).style('fill', "black").attr('r', 6);	
+                div.transition()		
+                    .duration(100)		
+                    .style("opacity", 0.9);		
+                div.html(
+                        "<span> <strong>Time = </strong>" +  d3.round(d.timeStamp, 2)+ 's' + "</span>" + "</br>" +
+                        "<span> <strong>X-Dist. = </strong> " + d3.round(d.xPosition, 2) + 'm' + "</span>" + "</br>" +
+                        "<span> <strong>Y-Dist. = </strong> " + d3.round(d.zPosition, 2) + 'm' + "</span>" + "</br>" +
+                        "<span> <strong>Velocity = </strong> " + d3.round(d.vel, 2) + 'm/s' + "</span>" + "</br>" +
+                        "<span> <strong>Lift Coef. = </strong> " + d3.round(d.cl, 2) + "</span>" + "</br>" +
+                        "<span> <strong>Drag Coef. = </strong> " + d3.round(d.cd, 2) + "</span>"
+                        )
+                    .style('border-color', d.dotColor)	
+                    .style("left", (d3.event.pageX) + "px")		
+                    .style("top", (d3.event.pageY - 28) + "px");	
+                })					
+            .on("mouseout", function(d) {
+                d3.select(this).style('fill', d.dotColor).attr('r', 4);		
+                div.transition()		
+                    .duration(100)		
+                    .style("opacity", 0);	
+            })
             .transition()
-            // .duration(1)
+            .duration(10)
             .delay(function(d, i) { return i*10; })
-            .attr('opacity', '0.4');
+            .attr('opacity', '0.5');    
     
         circles.exit()
             .transition()
@@ -290,9 +325,9 @@
 
     function reset() {
         argArr = [];
+        colorUsed = [false, false, false, false, false];
         draw();
     }
-    
 
 </script>
 	

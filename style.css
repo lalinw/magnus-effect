@@ -15,4 +15,31 @@ body {
 
 .title {
     text-align: center;
+    padding: 40px 0px 30px;
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: left;			
+    width: auto;					
+    height: auto;					
+    padding: 8px;
+    background: white;
+    font-family: Cambria, Cochin, Georgia, Times, Times New Roman, serif;				
+    font-size: 14px;	
+    border: 3px solid;
+    border-radius: 5px;
+}
+
+.show {
+    display: block;
+}
+
+.hide {
+    display: none;
+}
+
+input {
+    margin-left: 5px;
+    padding-left: 5px;
 }
